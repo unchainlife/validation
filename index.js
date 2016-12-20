@@ -27,7 +27,7 @@ function validateStrict(result, data, options) {
   return true;
 }
 
-function convertNumber(result, name, rule, value) {
+function convertNumber(result, name, value) {
   if (typeof value === 'undefined') return null;
   if (typeof value === 'number') return value;
   if (typeof value === 'string') {
@@ -38,46 +38,138 @@ function convertNumber(result, name, rule, value) {
   return value;
 }
 
-function convertString(result, name, rule, value) {
-  if (typeof value === 'undefined') return null;
-  if (typeof value === 'string') return value;
-  return value.toString();
+function convertString(result, name, value) {
+  return (value === null ||
+          typeof value === 'undefined' ||
+          typeof value === 'string')
+    ? value
+    : value.toString();
 }
 
-function convertDate(result, name, rule, value) {
-  if (typeof value === 'undefined') return null;
-  if (value instanceof Date) return value;
-  if (typeof value === 'string') {
-    var date = Date.parse(value);
-    if (!isNaN(date)) return new Date(date);
+function convertBoolean(result, name, value) {
+  return (
+    typeof value === 'string' &&
+    ['1', 'on', 'true'].indexOf(value.toLowerCase()) == -1
+  ) || !!value;
+}
+
+function convertDate(result, name, value) {
+  if (value === null ||
+      typeof value === 'undefined' ||
+      value instanceof Date) {
+    return value;
   }
+  var date = Date.parse(value);
+  if (!isNaN(date)) return new Date(date);
   addError(result, name, `'${value}' is not a valid date.`);
   return value;
 }
 
+function convertValue(result, name, type, value) {
+  switch (type) {
+    case Boolean:
+      return convertBoolean(result, name, value);
+    case Number:
+      return convertNumber(result, name, value);
+    case String:
+      return convertString(result, name, value);
+    case Date:
+      return convertDate(result, name, value);
+    default:
+      return value;
+  }
+}
+
 function convertType(result, data, options, name, rule, value) {
   if (Array.isArray(rule.type)) {
-    result.data[name] = value;
+    if (rule.type.length !== 1) {
+      return addError(result, name, 'type is not properly defined.');
+    }
+    if (Array.isArray(value)) {
+      var a = [];
+      for (var i=0,j=value.length;i<j;i++) {
+        a.push(convertValue(result, name, rule.type[0], value[i]));
+      }
+      value = a;
+    } else {
+      value = [ convertValue(result, name, rule.type[0], value) ];
+    }
   } else {
-    switch (rule.type) {
-      case Number:
-        result.data[name] = convertNumber(result, name, rule, value);
-        break;
-      case String:
-        result.data[name] = convertString(result, name, rule, value);
-        break;
-      case Date:
-        result.data[name] = convertDate(result, name, rule, value);
-        break;
-      default:
-        result.data[name] = value;
+    value = convertValue(result, name, rule.type, value);
+  }
+  result.data[name] = value;
+  return true;
+}
+
+function validateNumber(result, name, rule, value) {
+  if (rule.min && rule.max && (value < rule.min || value > rule.max)) {
+    addError(result, name, `${value} must be between ${rule.min} and ${rule.max}.`);
+  } else if (rule.min && value < rule.min) {
+    addError(result, name, `${value} must be at least ${rule.min}.`);
+  } else if (rule.max && value > rule.max) {
+    addError(result, name, `${value} must be not above ${rule.max}.`);
+  }
+}
+
+function validateString(result, name, rule, value) {
+  let length = value.length;
+  if (rule.minLength && rule.maxLength && (length < rule.minLength || length > rule.maxLength)) {
+    addError(result, name, `length must be between ${rule.minLength} and ${rule.maxLength}.`);
+  } else if (rule.minLength && length < rule.minLength) {
+    addError(result, name, `Length must be at least ${rule.minLength}.`);
+  } else if (rule.maxLength && length > rule.maxLength) {
+    addError(result, name, `Length must be at most ${rule.maxLength}.`);
+  }
+  if (rule.required && length == 0) {
+    addError(result, name, 'value is required.');
+  }
+  if (rule.pattern) {
+    let regex = typeof rule.pattern === 'string'
+              ? new Regex(rule.pattern)
+              : rule.pattern;
+    if (!regex.test(value)) {
+      addError(result, name, 'value is invaid.');
     }
   }
-  return true;
+}
+
+function validateBoolean(result, name, rule, value) {
+}
+
+function validateDate(result, name, rule, value) {
+}
+
+function validateUndefined(result, name, rule, value) {
+  if (rule.required) {
+    addError(result, name, `a value is required.`);
+  }
 }
 
 function validateRule(result, data, options, name, rule, value) {
   if (!convertType(result, data, options, name, rule, value)) return false;
+  value = result.data[name];
+  switch(typeof value) {
+    case 'boolean':
+      validateBoolean(result, name, rule, value);
+      break;
+    case 'number':
+      validateNumber(result, name, rule, value);
+      break;
+    case 'string':
+      validateString(result, name, rule, value);
+      break;
+    case 'object':
+      if (value instanceof Date) {
+        validateDate(result, name, rule, value)
+        break;
+      }
+      // null falls through
+    case 'undefined':
+      validateUndefined(result, name, rule, value);
+      break;
+    default:
+      addError(result, name, `Unhandled type: ${typeof value}`);
+  }
   return true;
 }
 
