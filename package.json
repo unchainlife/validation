@@ -1,0 +1,30 @@
+{
+  "name": "validation-unchained",
+  "version": "0.0.2",
+  "description": "JSON object validation",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "mocha --compilers js:babel-core/register --watch --growl"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/unchainlife/validation.git"
+  },
+  "keywords": [
+    "validation"
+  ],
+  "author": "Chris Kemp <chris@unchain.life>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/unchainlife/validation/issues"
+  },
+  "homepage": "https://github.com/unchainlife/validation#readme",
+  "devDependencies": {
+    "babel-core": "^6.21.0",
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0"
+  }
+}
