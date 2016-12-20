@@ -20,14 +20,21 @@
 ## Features
 
 1. Type Conversion
-  1. Number
-  1. String [WIP]
-  1. Date [WIP]
-  1. Boolean [WIP]
+    1. Boolean
+    1. Date
+    1. Number
+    1. String
 1. Strict enforcement
-1. Required values [WIP]
-1. Number ranges [WIP]
-1. String lengths [WIP]
-1. Array Values [WIP]
-1. Regular Expression [WIP]
+1. Array Values
+1. All Types
+    1. Required
+1. Boolean Validation
+1. Date Validation
+1. Number Validation
+    1. Min values
+    1. Max values
+1. String Validation
+    1. Required values
+    1. String lengths
+    1. Regular Expression
 1. Custom Validation [WIP]
