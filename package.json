@@ -1,6 +1,6 @@
 {
   "name": "validation-unchained",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "JSON object validation",
   "main": "index.js",
   "directories": {

@@ -91,6 +91,8 @@ function convertType(result, data, options, name, rule, value) {
         a.push(convertValue(result, name, rule.type[0], value[i]));
       }
       value = a;
+    } else if (rule.split) {
+      value = value.split(rule.split);
     } else {
       value = [ convertValue(result, name, rule.type[0], value) ];
     }
