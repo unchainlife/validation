@@ -1,12 +1,13 @@
 {
   "name": "validation-unchained",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "JSON object validation",
-  "main": "index.js",
+  "main": "dist/index.min.js",
   "directories": {
     "test": "tests"
   },
   "scripts": {
+    "dist": "babel index.js -o dist/index.min.js --minified",
     "test": "mocha --compilers js:babel-core/register",
     "test:watch": "mocha --compilers js:babel-core/register --watch --growl"
   },
@@ -24,7 +25,7 @@
   },
   "homepage": "https://github.com/unchainlife/validation#readme",
   "devDependencies": {
-    "babel": "^6.5.2",
+    "babel-cli": "^6.23.0",
     "babel-core": "^6.21.0",
     "chai": "^3.5.0",
     "mocha": "^3.2.0"
